@@ -50,3 +50,11 @@ export async function copyBubbleImage(filePath: string): Promise<void> {
     await image.close();
   }
 }
+
+export async function startBubbleFileDrag(filePath: string): Promise<void> {
+  await invoke("start_bubble_file_drag", {
+    payload: {
+      filePath,
+    },
+  });
+}

@@ -150,6 +150,10 @@ export default function App(): JSX.Element {
         onCopyPath={handleCopyPath}
         onCopyImage={handleCopyImage}
         onDelete={handleDelete}
+        onDragOutError={(message) => {
+          setNotice(null);
+          setError(message);
+        }}
       />
       <div className="status-bar" aria-live="polite">
         {error ? <span className="status-bar__error">{error}</span> : notice}

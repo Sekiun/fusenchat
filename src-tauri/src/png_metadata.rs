@@ -115,12 +115,14 @@ mod tests {
 
     fn generate_png() -> Vec<u8> {
         let mut bytes = Vec::new();
-        let mut encoder = png::Encoder::new(&mut bytes, 1, 1);
-        encoder.set_color(png::ColorType::Rgba);
-        encoder.set_depth(png::BitDepth::Eight);
+        {
+            let mut encoder = png::Encoder::new(&mut bytes, 1, 1);
+            encoder.set_color(png::ColorType::Rgba);
+            encoder.set_depth(png::BitDepth::Eight);
 
-        let mut writer = encoder.write_header().expect("header");
-        writer.write_image_data(&[0_u8, 0, 0, 0]).expect("pixels");
+            let mut writer = encoder.write_header().expect("header");
+            writer.write_image_data(&[0_u8, 0, 0, 0]).expect("pixels");
+        }
         bytes
     }
 }

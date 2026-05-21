@@ -1,3 +1,4 @@
+import { startBubbleFileDrag } from "../lib/fileUtils";
 import type { BubbleItem } from "../types";
 
 type BubbleCardProps = {
@@ -6,6 +7,7 @@ type BubbleCardProps = {
   onCopyPath: (bubble: BubbleItem) => Promise<void> | void;
   onCopyImage: (bubble: BubbleItem) => Promise<void> | void;
   onDelete: (bubble: BubbleItem) => Promise<void> | void;
+  onDragOutError: (message: string) => void;
 };
 
 export function BubbleCard({
@@ -14,21 +16,23 @@ export function BubbleCard({
   onCopyPath,
   onCopyImage,
   onDelete,
+  onDragOutError,
 }: BubbleCardProps): JSX.Element {
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>): void => {
-    const fileUri = toFileUri(bubble.filePath);
-    event.dataTransfer.setData("text/plain", bubble.filePath);
-    event.dataTransfer.setData("text/uri-list", fileUri);
-    event.dataTransfer.effectAllowed = "copy";
+    event.preventDefault();
+    void startBubbleFileDrag(bubble.filePath).catch((error: unknown) => {
+      console.error(error);
+      onDragOutError(
+        error instanceof Error && error.message
+          ? error.message
+          : "Native file drag could not be started.",
+      );
+    });
   };
 
   return (
     <article className="bubble-row">
-      <div
-        className="bubble-card"
-        draggable
-        onDragStart={handleDragStart}
-      >
+      <div className="bubble-card" draggable onDragStart={handleDragStart}>
         <img
           className="bubble-card__image"
           src={bubble.previewSrc}
@@ -39,28 +43,23 @@ export function BubbleCard({
         />
         <div className="bubble-card__actions">
           <button type="button" onClick={() => void onCopyPath(bubble)}>
-            パス
+            Path
           </button>
           <button type="button" onClick={() => void onCopyImage(bubble)}>
-            画像
+            Image
           </button>
           <button type="button" onClick={() => void onOpenFolder(bubble)}>
-            フォルダ
+            Folder
           </button>
           <button
             type="button"
             className="danger"
             onClick={() => void onDelete(bubble)}
           >
-            削除
+            Delete
           </button>
         </div>
       </div>
     </article>
   );
-}
-
-function toFileUri(filePath: string): string {
-  const normalized = filePath.replace(/\\/g, "/");
-  return encodeURI(`file:///${normalized}`);
 }

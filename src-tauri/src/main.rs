@@ -27,6 +27,12 @@ struct DeleteBubblePngRequest {
     file_path: String,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct StartBubbleFileDragRequest {
+    file_path: String,
+}
+
 #[tauri::command]
 fn save_bubble_png_with_metadata(
     app: tauri::AppHandle,
@@ -58,6 +64,44 @@ fn delete_bubble_png_file(
     let file_path = ensure_bubble_file_path(&app, &payload.file_path)?;
     fs::remove_file(&file_path).map_err(|error| format!("Failed to delete PNG file: {error}"))?;
     Ok(())
+}
+
+#[tauri::command]
+fn start_bubble_file_drag(
+    app: tauri::AppHandle,
+    window: tauri::Window,
+    payload: StartBubbleFileDragRequest,
+) -> Result<(), String> {
+    let file_path = ensure_bubble_file_path(&app, &payload.file_path)?;
+    let preview_icon_path = file_path.clone();
+    let (tx, rx) = std::sync::mpsc::channel();
+
+    app.run_on_main_thread(move || {
+        #[cfg(target_os = "linux")]
+        let raw_window = window.gtk_window().map_err(|error| error.to_string());
+        #[cfg(not(target_os = "linux"))]
+        let raw_window: Result<tauri::Window, String> = Ok(window.clone());
+
+        let drag_result = match raw_window {
+            Ok(raw_window) => drag::start_drag(
+                &raw_window,
+                drag::DragItem::Files(vec![file_path]),
+                drag::Image::File(preview_icon_path),
+                |_, _| {},
+                drag::Options::default(),
+            )
+            .map_err(|error| format!("Failed to start native file drag: {error}")),
+            Err(error) => Err(format!(
+                "Failed to access the native window for drag out: {error}"
+            )),
+        };
+
+        let _ = tx.send(drag_result);
+    })
+    .map_err(|error| format!("Failed to schedule native drag start: {error}"))?;
+
+    rx.recv()
+        .map_err(|error| format!("Failed to receive native drag result: {error}"))?
 }
 
 fn bubble_cache_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
@@ -112,7 +156,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             save_bubble_png_with_metadata,
             read_bubble_png_metadata_from_bytes,
-            delete_bubble_png_file
+            delete_bubble_png_file,
+            start_bubble_file_drag
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

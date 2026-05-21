@@ -8,6 +8,7 @@ type ChatAreaProps = {
   onCopyPath: (bubble: BubbleItem) => Promise<void> | void;
   onCopyImage: (bubble: BubbleItem) => Promise<void> | void;
   onDelete: (bubble: BubbleItem) => Promise<void> | void;
+  onDragOutError: (message: string) => void;
 };
 
 export function ChatArea(props: ChatAreaProps): JSX.Element {
@@ -28,7 +29,7 @@ export function ChatArea(props: ChatAreaProps): JSX.Element {
       {bubbles.length === 0 ? (
         <div className="chat-empty">
           <p>Enter でテキストを PNG バブル化します。</p>
-          <p>生成した PNG を入力欄へドロップすると、埋め込んだ文字列を追記します。</p>
+          <p>生成した画像はドラッグで外部アプリへ持ち出せます。</p>
         </div>
       ) : (
         bubbles.map((bubble) => (
@@ -39,6 +40,7 @@ export function ChatArea(props: ChatAreaProps): JSX.Element {
             onCopyPath={props.onCopyPath}
             onCopyImage={props.onCopyImage}
             onDelete={props.onDelete}
+            onDragOutError={props.onDragOutError}
           />
         ))
       )}
