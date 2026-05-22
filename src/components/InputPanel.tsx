@@ -1,7 +1,18 @@
 import { useRef, useState } from "react";
 import { readMetadataFromPngBytes } from "../lib/pngMetadata";
 
+const BUBBLE_COLOR_PRESETS = [
+  "#2f2f2f",
+  "#3e5a78",
+  "#6b4d7a",
+  "#3a6b52",
+  "#8b5a3c",
+  "#d9d4c7",
+];
+
 type InputPanelProps = {
+  bubbleColor: string;
+  onBubbleColorChange: (value: string) => void;
   value: string;
   submitting: boolean;
   onChange: (value: string) => void;
@@ -12,6 +23,8 @@ type InputPanelProps = {
 };
 
 export function InputPanel({
+  bubbleColor,
+  onBubbleColorChange,
   value,
   submitting,
   onChange,
@@ -88,6 +101,29 @@ export function InputPanel({
   return (
     <section className="input-panel">
       <div className="input-panel__surface">
+        <div className="bubble-color-picker">
+          <div className="bubble-color-picker__label">Bubble color</div>
+          <div className="bubble-color-picker__controls">
+            {BUBBLE_COLOR_PRESETS.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                className={`bubble-color-swatch${bubbleColor === preset ? " is-active" : ""}`}
+                style={{ backgroundColor: preset }}
+                aria-label={`Select ${preset}`}
+                onClick={() => onBubbleColorChange(preset)}
+              />
+            ))}
+            <label className="bubble-color-custom">
+              <span>Custom</span>
+              <input
+                type="color"
+                value={bubbleColor}
+                onChange={(event) => onBubbleColorChange(event.target.value)}
+              />
+            </label>
+          </div>
+        </div>
         <textarea
           ref={textareaRef}
           className={`input-box${isDragActive ? " input-box--dragging" : ""}`}

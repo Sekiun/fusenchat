@@ -13,9 +13,12 @@ import {
 } from "./lib/fileUtils";
 import type { BubbleItem, FusenchatPngMetadata } from "./types";
 
+const DEFAULT_BUBBLE_COLOR = "#2f2f2f";
+
 export default function App(): JSX.Element {
   const [bubbles, setBubbles] = useState<BubbleItem[]>([]);
   const [inputText, setInputText] = useState("");
+  const [bubbleColor, setBubbleColor] = useState(DEFAULT_BUBBLE_COLOR);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +54,9 @@ export default function App(): JSX.Element {
     setNotice("PNG バブルを生成しています…");
 
     try {
-      const rendered = await renderBubbleToPng(rawText);
+      const rendered = await renderBubbleToPng(rawText, {
+        bubbleColor,
+      });
       const fileName = buildBubbleFileName(new Date());
       const filePath = await saveBubblePngWithMetadata(rendered.blob, fileName, metadata);
       const previewSrc = URL.createObjectURL(rendered.blob);
@@ -63,6 +68,8 @@ export default function App(): JSX.Element {
         filePath,
         previewSrc,
         createdAt,
+        bubbleColor: rendered.bubbleColor,
+        textColor: rendered.textColor,
         width: rendered.width,
         height: rendered.height,
       };
@@ -159,6 +166,8 @@ export default function App(): JSX.Element {
         {error ? <span className="status-bar__error">{error}</span> : notice}
       </div>
       <InputPanel
+        bubbleColor={bubbleColor}
+        onBubbleColorChange={setBubbleColor}
         value={inputText}
         submitting={isSubmitting}
         onChange={setInputText}

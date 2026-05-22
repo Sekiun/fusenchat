@@ -3,7 +3,7 @@ cargo:rustc-check-cfg=cfg(desktop)
 cargo:rustc-cfg=desktop
 cargo:rustc-check-cfg=cfg(mobile)
 cargo:rerun-if-changed=C:\Users\nagay\Documents\fusenchat\src-tauri\tauri.conf.json
-cargo:rustc-env=TAURI_ANDROID_PACKAGE_NAME_APP_NAME=app
+cargo:rustc-env=TAURI_ANDROID_PACKAGE_NAME_APP_NAME=desktop
 cargo:rustc-env=TAURI_ANDROID_PACKAGE_NAME_PREFIX=com_fusenchat
 cargo:rustc-check-cfg=cfg(dev)
 cargo:rustc-cfg=dev

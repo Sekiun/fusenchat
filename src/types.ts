@@ -4,6 +4,8 @@ export type BubbleItem = {
   filePath: string;
   previewSrc: string;
   createdAt: string;
+  bubbleColor: string;
+  textColor: string;
   width: number;
   height: number;
 };
