@@ -18,6 +18,7 @@ import {
   openBubbleFolder,
   saveBubblePngWithMetadata,
 } from "./lib/fileUtils";
+import { isBlobUrl } from "./lib/runtime";
 import type { BubbleItem, FusenchatPngMetadata, RenderScale, WritingMode } from "./types";
 
 const DEFAULT_BUBBLE_COLOR = "#2f2f2f";
@@ -91,12 +92,13 @@ export default function App(): JSX.Element {
       });
       const fileName = buildBubbleFileName(new Date());
       const filePath = await saveBubblePngWithMetadata(rendered.blob, fileName, metadata);
-      const previewSrc = URL.createObjectURL(rendered.blob);
+      const previewSrc = isBlobUrl(filePath) ? filePath : URL.createObjectURL(rendered.blob);
       previewUrlsRef.current.add(previewSrc);
 
       const bubble: BubbleItem = {
         id: typeof crypto.randomUUID === "function" ? crypto.randomUUID() : fileName,
         text: rawText,
+        fileName,
         filePath,
         previewSrc,
         createdAt,
@@ -141,6 +143,9 @@ export default function App(): JSX.Element {
       await deleteBubbleFile(bubble.filePath);
       setBubbles((prev) => prev.filter((item) => item.id !== bubble.id));
       revokePreviewUrl(bubble.previewSrc, previewUrlsRef.current);
+      if (bubble.filePath !== bubble.previewSrc && isBlobUrl(bubble.filePath)) {
+        URL.revokeObjectURL(bubble.filePath);
+      }
       setNotice("PNG を削除しました。");
       setError(null);
     } catch (deleteError) {
@@ -151,7 +156,7 @@ export default function App(): JSX.Element {
 
   const handleOpenFolder = async (bubble: BubbleItem): Promise<void> => {
     try {
-      await openBubbleFolder(bubble.filePath);
+      await openBubbleFolder(bubble.filePath, bubble.fileName);
       setNotice("保存先フォルダを開きました。");
       setError(null);
     } catch (openError) {
@@ -162,7 +167,7 @@ export default function App(): JSX.Element {
 
   const handleCopyPath = async (bubble: BubbleItem): Promise<void> => {
     try {
-      await copyFilePath(bubble.filePath);
+      await copyFilePath(bubble.filePath, bubble.fileName);
       setNotice("ファイルパスをコピーしました。");
       setError(null);
     } catch (copyError) {
@@ -173,7 +178,7 @@ export default function App(): JSX.Element {
 
   const handleCopyImage = async (bubble: BubbleItem): Promise<void> => {
     try {
-      await copyBubbleImage(bubble.filePath);
+      await copyBubbleImage(bubble.filePath, bubble.previewSrc);
       setNotice("画像をクリップボードへコピーしました。");
       setError(null);
     } catch (copyError) {
