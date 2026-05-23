@@ -11,6 +11,7 @@ body,
   --app-bg: #151515;
   --header-bg: #303030;
   --panel-bg: #1b1b1b;
+  --control-bg: #111111;
   --input-bg: #2c2c2c;
   --input-border: #3f3f3f;
   --input-border-active: #6f6f6f;
@@ -148,6 +149,14 @@ button {
   margin: 0 auto;
 }
 
+.composer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+
 .bubble-color-picker {
   display: flex;
   align-items: center;
@@ -158,6 +167,40 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.03);
+}
+
+.toolbar-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-width: 160px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.toolbar-select {
+  appearance: none;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: var(--control-bg);
+  color: var(--text-main);
+}
+
+.toolbar-select option {
+  background: var(--control-bg);
+  color: var(--text-main);
+}
+
+.toolbar-select--font {
+  min-width: 220px;
 }
 
 .bubble-color-picker__label {
@@ -204,6 +247,25 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   background: transparent;
+}
+
+.writing-mode-toggle {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.writing-mode-toggle button {
+  min-width: 72px;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--text-main);
+}
+
+.writing-mode-toggle button.is-active {
+  border-color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .input-box {
@@ -260,6 +322,10 @@ button {
 
   .bubble-color-picker {
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .composer-toolbar {
     flex-direction: column;
   }
 

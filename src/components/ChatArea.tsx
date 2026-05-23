@@ -29,7 +29,7 @@ export function ChatArea(props: ChatAreaProps): JSX.Element {
       {bubbles.length === 0 ? (
         <div className="chat-empty">
           <p>Enter でテキストを PNG バブル化します。</p>
-          <p>生成した画像はドラッグで外部アプリへ持ち出せます。</p>
+          <p>フォント変更と縦書きバブルにも対応しています。</p>
         </div>
       ) : (
         bubbles.map((bubble) => (

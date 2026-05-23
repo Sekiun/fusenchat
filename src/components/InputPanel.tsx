@@ -1,4 +1,6 @@
 import { useRef, useState } from "react";
+import { toCssFontFamily } from "../lib/fontUtils";
+import type { WritingMode } from "../types";
 import { readMetadataFromPngBytes } from "../lib/pngMetadata";
 
 const BUBBLE_COLOR_PRESETS = [
@@ -11,27 +13,37 @@ const BUBBLE_COLOR_PRESETS = [
 ];
 
 type InputPanelProps = {
+  availableFonts: string[];
   bubbleColor: string;
+  fontFamily: string;
   onBubbleColorChange: (value: string) => void;
-  value: string;
-  submitting: boolean;
+  onFontFamilyChange: (value: string) => void;
+  onWritingModeChange: (value: WritingMode) => void;
   onChange: (value: string) => void;
-  onSubmit: () => void;
   onAppendTexts: (texts: string[]) => void;
-  onNotice: (message: string | null) => void;
   onError: (message: string | null) => void;
+  onNotice: (message: string | null) => void;
+  onSubmit: () => void;
+  submitting: boolean;
+  value: string;
+  writingMode: WritingMode;
 };
 
 export function InputPanel({
+  availableFonts,
   bubbleColor,
+  fontFamily,
   onBubbleColorChange,
-  value,
-  submitting,
+  onFontFamilyChange,
+  onWritingModeChange,
   onChange,
-  onSubmit,
   onAppendTexts,
-  onNotice,
   onError,
+  onNotice,
+  onSubmit,
+  submitting,
+  value,
+  writingMode,
 }: InputPanelProps): JSX.Element {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
@@ -101,29 +113,68 @@ export function InputPanel({
   return (
     <section className="input-panel">
       <div className="input-panel__surface">
-        <div className="bubble-color-picker">
-          <div className="bubble-color-picker__label">Bubble color</div>
-          <div className="bubble-color-picker__controls">
-            {BUBBLE_COLOR_PRESETS.map((preset) => (
+        <div className="composer-toolbar">
+          <div className="bubble-color-picker">
+            <div className="bubble-color-picker__label">Bubble color</div>
+            <div className="bubble-color-picker__controls">
+              {BUBBLE_COLOR_PRESETS.map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  className={`bubble-color-swatch${bubbleColor === preset ? " is-active" : ""}`}
+                  style={{ backgroundColor: preset }}
+                  aria-label={`Select ${preset}`}
+                  onClick={() => onBubbleColorChange(preset)}
+                />
+              ))}
+              <label className="bubble-color-custom">
+                <span>Custom</span>
+                <input
+                  type="color"
+                  value={bubbleColor}
+                  onChange={(event) => onBubbleColorChange(event.target.value)}
+                />
+              </label>
+            </div>
+          </div>
+
+          <label className="toolbar-field">
+            <span>System Font</span>
+            <select
+              className="toolbar-select toolbar-select--font"
+              value={fontFamily}
+              style={{ fontFamily: toCssFontFamily(fontFamily) }}
+              onChange={(event) => onFontFamilyChange(event.target.value)}
+            >
+              {availableFonts.map((family) => (
+                <option key={family} value={family} style={{ fontFamily: toCssFontFamily(family) }}>
+                  {family}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="toolbar-field">
+            <span>Writing</span>
+            <div className="writing-mode-toggle" role="group" aria-label="Writing mode">
               <button
-                key={preset}
                 type="button"
-                className={`bubble-color-swatch${bubbleColor === preset ? " is-active" : ""}`}
-                style={{ backgroundColor: preset }}
-                aria-label={`Select ${preset}`}
-                onClick={() => onBubbleColorChange(preset)}
-              />
-            ))}
-            <label className="bubble-color-custom">
-              <span>Custom</span>
-              <input
-                type="color"
-                value={bubbleColor}
-                onChange={(event) => onBubbleColorChange(event.target.value)}
-              />
-            </label>
+                className={writingMode === "horizontal" ? "is-active" : ""}
+                onClick={() => onWritingModeChange("horizontal")}
+              >
+                横書き
+              </button>
+              <button
+                type="button"
+                className={writingMode === "vertical" ? "is-active" : ""}
+                onClick={() => onWritingModeChange("vertical")}
+              >
+                縦書き
+              </button>
+            </div>
           </div>
         </div>
+
         <textarea
           ref={textareaRef}
           className={`input-box${isDragActive ? " input-box--dragging" : ""}`}

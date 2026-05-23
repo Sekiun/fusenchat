@@ -58,3 +58,7 @@ export async function startBubbleFileDrag(filePath: string): Promise<void> {
     },
   });
 }
+
+export async function listSystemFontFamilies(): Promise<string[]> {
+  return invoke<string[]>("list_system_font_families");
+}

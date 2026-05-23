@@ -5,20 +5,30 @@ import { InputPanel } from "./components/InputPanel";
 import { renderBubbleToPng } from "./lib/bubbleRenderer";
 import { buildBubbleFileName, formatIsoWithOffset } from "./lib/dateUtils";
 import {
+  DEFAULT_FONT_FAMILY,
+  getFallbackFontFamilies,
+  loadLocalFontFamilies,
+  mergeFontFamilies,
+} from "./lib/fontUtils";
+import {
   copyBubbleImage,
   copyFilePath,
   deleteBubbleFile,
+  listSystemFontFamilies,
   openBubbleFolder,
   saveBubblePngWithMetadata,
 } from "./lib/fileUtils";
-import type { BubbleItem, FusenchatPngMetadata } from "./types";
+import type { BubbleItem, FusenchatPngMetadata, WritingMode } from "./types";
 
 const DEFAULT_BUBBLE_COLOR = "#2f2f2f";
 
 export default function App(): JSX.Element {
+  const [availableFonts, setAvailableFonts] = useState<string[]>([DEFAULT_FONT_FAMILY]);
   const [bubbles, setBubbles] = useState<BubbleItem[]>([]);
   const [inputText, setInputText] = useState("");
   const [bubbleColor, setBubbleColor] = useState(DEFAULT_BUBBLE_COLOR);
+  const [fontFamily, setFontFamily] = useState(DEFAULT_FONT_FAMILY);
+  const [writingMode, setWritingMode] = useState<WritingMode>("horizontal");
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,6 +39,24 @@ export default function App(): JSX.Element {
       for (const url of previewUrlsRef.current) {
         URL.revokeObjectURL(url);
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    void Promise.all([loadLocalFontFamilies(), listSystemFontFamilies().catch(() => [])]).then(
+      ([localFonts, systemFonts]) => {
+        if (active) {
+          setAvailableFonts(
+            mergeFontFamilies(localFonts, systemFonts, getFallbackFontFamilies()),
+          );
+        }
+      },
+    );
+
+    return () => {
+      active = false;
     };
   }, []);
 
@@ -56,6 +84,8 @@ export default function App(): JSX.Element {
     try {
       const rendered = await renderBubbleToPng(rawText, {
         bubbleColor,
+        fontFamily,
+        writingMode,
       });
       const fileName = buildBubbleFileName(new Date());
       const filePath = await saveBubblePngWithMetadata(rendered.blob, fileName, metadata);
@@ -69,7 +99,9 @@ export default function App(): JSX.Element {
         previewSrc,
         createdAt,
         bubbleColor: rendered.bubbleColor,
+        fontFamily: rendered.fontFamily,
         textColor: rendered.textColor,
+        writingMode: rendered.writingMode,
         width: rendered.width,
         height: rendered.height,
       };
@@ -166,15 +198,20 @@ export default function App(): JSX.Element {
         {error ? <span className="status-bar__error">{error}</span> : notice}
       </div>
       <InputPanel
+        availableFonts={availableFonts}
         bubbleColor={bubbleColor}
+        fontFamily={fontFamily}
         onBubbleColorChange={setBubbleColor}
-        value={inputText}
-        submitting={isSubmitting}
+        onFontFamilyChange={setFontFamily}
+        onWritingModeChange={setWritingMode}
         onChange={setInputText}
-        onSubmit={() => void handleSubmit()}
         onAppendTexts={handleAppendTexts}
-        onNotice={setNotice}
         onError={setError}
+        onNotice={setNotice}
+        onSubmit={() => void handleSubmit()}
+        submitting={isSubmitting}
+        value={inputText}
+        writingMode={writingMode}
       />
     </div>
   );
