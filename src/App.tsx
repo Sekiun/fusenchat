@@ -91,12 +91,15 @@ export default function App(): JSX.Element {
         writingMode,
       });
       const fileName = buildBubbleFileName(new Date());
-      const filePath = await saveBubblePngWithMetadata(rendered.blob, fileName, metadata);
+      const saved = await saveBubblePngWithMetadata(rendered.blob, fileName, metadata);
+      const filePath = saved.filePath;
+      const bubbleBlob = saved.blob ?? rendered.blob;
       const previewSrc = isBlobUrl(filePath) ? filePath : URL.createObjectURL(rendered.blob);
       previewUrlsRef.current.add(previewSrc);
 
       const bubble: BubbleItem = {
         id: typeof crypto.randomUUID === "function" ? crypto.randomUUID() : fileName,
+        blob: bubbleBlob,
         text: rawText,
         fileName,
         filePath,

@@ -23,13 +23,19 @@ export function BubbleCard({
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>): void => {
     if (!desktopMode) {
+      const dragFile = new File([bubble.blob], bubble.fileName, {
+        type: bubble.blob.type || "image/png",
+      });
+
       event.dataTransfer.effectAllowed = "copy";
-      event.dataTransfer.setData(
-        "DownloadURL",
-        `image/png:${bubble.fileName}:${bubble.previewSrc}`,
-      );
-      event.dataTransfer.setData("text/uri-list", bubble.previewSrc);
-      event.dataTransfer.setData("text/plain", bubble.previewSrc);
+      if (typeof event.dataTransfer.items?.add === "function") {
+        event.dataTransfer.items.add(dragFile);
+      } else {
+        event.dataTransfer.setData(
+          "DownloadURL",
+          `image/png:${bubble.fileName}:${bubble.previewSrc}`,
+        );
+      }
       return;
     }
 
