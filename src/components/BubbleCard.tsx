@@ -21,7 +21,24 @@ export function BubbleCard({
 }: BubbleCardProps): JSX.Element {
   const desktopMode = isTauriRuntime();
 
-  const handleDragStart = (event: React.DragEvent<HTMLDivElement>): void => {
+  const handleDragStart = (event: React.DragEvent<HTMLDivElement | HTMLImageElement>): void => {
+    if (event.currentTarget instanceof HTMLImageElement) {
+      event.dataTransfer.setDragImage(
+        event.currentTarget,
+        Math.min(48, event.currentTarget.width / 2),
+        Math.min(48, event.currentTarget.height / 2),
+      );
+    } else {
+      const previewImage = event.currentTarget.querySelector<HTMLImageElement>(".bubble-card__image");
+      if (previewImage) {
+        event.dataTransfer.setDragImage(
+          previewImage,
+          Math.min(48, previewImage.width / 2),
+          Math.min(48, previewImage.height / 2),
+        );
+      }
+    }
+
     if (!desktopMode) {
       const dragFile = new File([bubble.blob], bubble.fileName, {
         type: bubble.blob.type || "image/png",
@@ -63,7 +80,8 @@ export function BubbleCard({
           alt={bubble.text}
           width={bubble.width}
           height={bubble.height}
-          draggable={false}
+          draggable
+          onDragStart={handleDragStart}
         />
         <div className="bubble-card__actions">
           {desktopMode ? (
