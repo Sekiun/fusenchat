@@ -38,6 +38,12 @@ Build the frontend:
 npm run build
 ```
 
+Deploy to Vercel:
+
+```bash
+vercel
+```
+
 Build a desktop bundle:
 
 ```bash
@@ -53,3 +59,11 @@ GitHub Actions packaging for Windows and macOS is defined in [.github/workflows/
 - macOS publishes DMG bundles for Apple Silicon and Intel
 
 More detail is documented in [docs/github_release_workflow.md](./docs/github_release_workflow.md).
+
+## Vercel deployment
+
+The repository includes [vercel.json](./vercel.json) for static Vite deployment.
+
+- Vercel serves the React frontend from `dist`
+- Browser deployments keep PNG export and PNG metadata restore working
+- Desktop-only features like native file drag-out and folder reveal stay Tauri-only
