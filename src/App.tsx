@@ -18,7 +18,7 @@ import {
   openBubbleFolder,
   saveBubblePngWithMetadata,
 } from "./lib/fileUtils";
-import type { BubbleItem, FusenchatPngMetadata, WritingMode } from "./types";
+import type { BubbleItem, FusenchatPngMetadata, RenderScale, WritingMode } from "./types";
 
 const DEFAULT_BUBBLE_COLOR = "#2f2f2f";
 
@@ -29,6 +29,7 @@ export default function App(): JSX.Element {
   const [bubbleColor, setBubbleColor] = useState(DEFAULT_BUBBLE_COLOR);
   const [fontFamily, setFontFamily] = useState(DEFAULT_FONT_FAMILY);
   const [writingMode, setWritingMode] = useState<WritingMode>("horizontal");
+  const [scale, setScale] = useState<RenderScale>(1);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,6 +86,7 @@ export default function App(): JSX.Element {
       const rendered = await renderBubbleToPng(rawText, {
         bubbleColor,
         fontFamily,
+        scale,
         writingMode,
       });
       const fileName = buildBubbleFileName(new Date());
@@ -203,12 +205,14 @@ export default function App(): JSX.Element {
         fontFamily={fontFamily}
         onBubbleColorChange={setBubbleColor}
         onFontFamilyChange={setFontFamily}
+        onScaleChange={setScale}
         onWritingModeChange={setWritingMode}
         onChange={setInputText}
         onAppendTexts={handleAppendTexts}
         onError={setError}
         onNotice={setNotice}
         onSubmit={() => void handleSubmit()}
+        scale={scale}
         submitting={isSubmitting}
         value={inputText}
         writingMode={writingMode}

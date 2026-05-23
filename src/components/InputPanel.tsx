@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { toCssFontFamily } from "../lib/fontUtils";
-import type { WritingMode } from "../types";
+import type { RenderScale, WritingMode } from "../types";
 import { readMetadataFromPngBytes } from "../lib/pngMetadata";
 
 const BUBBLE_COLOR_PRESETS = [
@@ -18,12 +18,14 @@ type InputPanelProps = {
   fontFamily: string;
   onBubbleColorChange: (value: string) => void;
   onFontFamilyChange: (value: string) => void;
+  onScaleChange: (value: RenderScale) => void;
   onWritingModeChange: (value: WritingMode) => void;
   onChange: (value: string) => void;
   onAppendTexts: (texts: string[]) => void;
   onError: (message: string | null) => void;
   onNotice: (message: string | null) => void;
   onSubmit: () => void;
+  scale: RenderScale;
   submitting: boolean;
   value: string;
   writingMode: WritingMode;
@@ -35,12 +37,14 @@ export function InputPanel({
   fontFamily,
   onBubbleColorChange,
   onFontFamilyChange,
+  onScaleChange,
   onWritingModeChange,
   onChange,
   onAppendTexts,
   onError,
   onNotice,
   onSubmit,
+  scale,
   submitting,
   value,
   writingMode,
@@ -156,7 +160,7 @@ export function InputPanel({
 
           <div className="toolbar-field">
             <span>Writing</span>
-            <div className="writing-mode-toggle" role="group" aria-label="Writing mode">
+            <div className="toolbar-toggle" role="group" aria-label="Writing mode">
               <button
                 type="button"
                 className={writingMode === "horizontal" ? "is-active" : ""}
@@ -170,6 +174,32 @@ export function InputPanel({
                 onClick={() => onWritingModeChange("vertical")}
               >
                 縦書き
+              </button>
+            </div>
+          </div>
+          <div className="toolbar-field">
+            <span>Resolution</span>
+            <div className="toolbar-toggle" role="group" aria-label="Render scale">
+              <button
+                type="button"
+                className={scale === 1 ? "is-active" : ""}
+                onClick={() => onScaleChange(1)}
+              >
+                1x
+              </button>
+              <button
+                type="button"
+                className={scale === 2 ? "is-active" : ""}
+                onClick={() => onScaleChange(2)}
+              >
+                2x
+              </button>
+              <button
+                type="button"
+                className={scale === 3 ? "is-active" : ""}
+                onClick={() => onScaleChange(3)}
+              >
+                3x
               </button>
             </div>
           </div>

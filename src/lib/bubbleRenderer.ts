@@ -1,6 +1,6 @@
 import { marked } from "marked";
 import { toCssFontFamily } from "./fontUtils";
-import type { WritingMode } from "../types";
+import type { RenderScale, WritingMode } from "../types";
 
 export type RenderBubbleOptions = {
   bubbleColor?: string;
@@ -13,6 +13,7 @@ export type RenderBubbleOptions = {
   radius?: number;
   textColor?: string;
   writingMode?: WritingMode;
+  scale?: RenderScale;
 };
 
 export type RenderedBubble = {
@@ -114,6 +115,7 @@ const DEFAULT_OPTIONS: Required<RenderBubbleOptions> = {
   radius: 20,
   textColor: "",
   writingMode: "horizontal",
+  scale: 1,
 };
 
 const QUOTE_INDENT = 18;
@@ -196,9 +198,11 @@ async function renderHorizontalBubble(
   const bubbleHeight = Math.ceil(
     Math.max(contentHeight + options.paddingY * 2, options.paddingY * 2 + baseLineHeight),
   );
+  const scale = normalizeRenderScale(options.scale);
 
-  canvas.width = bubbleWidth;
-  canvas.height = bubbleHeight;
+  canvas.width = Math.max(1, Math.ceil(bubbleWidth * scale));
+  canvas.height = Math.max(1, Math.ceil(bubbleHeight * scale));
+  ctx.scale(scale, scale);
 
   ctx.clearRect(0, 0, bubbleWidth, bubbleHeight);
   ctx.textBaseline = "top";
@@ -238,6 +242,7 @@ async function renderVerticalBubble(
   const contentHeight = Math.max(1, Math.ceil(measurement.height));
   const bubbleWidth = Math.ceil(contentWidth + options.paddingX * 2);
   const bubbleHeight = Math.ceil(contentHeight + options.paddingY * 2);
+  const scale = normalizeRenderScale(options.scale);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
@@ -245,8 +250,9 @@ async function renderVerticalBubble(
     throw new Error("Canvas 2D context could not be created.");
   }
 
-  canvas.width = bubbleWidth;
-  canvas.height = bubbleHeight;
+  canvas.width = Math.max(1, Math.ceil(bubbleWidth * scale));
+  canvas.height = Math.max(1, Math.ceil(bubbleHeight * scale));
+  ctx.scale(scale, scale);
 
   const svgMarkup = createVerticalBubbleSvg({
     backgroundColor: bubbleColor,
@@ -275,7 +281,7 @@ async function renderVerticalBubble(
   const image = await loadSvgImage(svgMarkup);
 
   ctx.clearRect(0, 0, bubbleWidth, bubbleHeight);
-  ctx.drawImage(image, 0, 0);
+  ctx.drawImage(image, 0, 0, bubbleWidth, bubbleHeight);
 
   return {
     blob: await canvasToBlob(canvas),
@@ -917,6 +923,14 @@ function normalizeHexColor(color: string): string {
   }
 
   return DEFAULT_OPTIONS.bubbleColor;
+}
+
+function normalizeRenderScale(scale: number): RenderScale {
+  if (scale === 2 || scale === 3) {
+    return scale;
+  }
+
+  return 1;
 }
 
 function getReadableTextColor(backgroundColor: string): string {

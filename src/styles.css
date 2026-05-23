@@ -249,12 +249,12 @@ button {
   background: transparent;
 }
 
-.writing-mode-toggle {
+.toolbar-toggle {
   display: inline-flex;
   gap: 6px;
 }
 
-.writing-mode-toggle button {
+.toolbar-toggle button {
   min-width: 72px;
   padding: 7px 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -263,7 +263,7 @@ button {
   color: var(--text-main);
 }
 
-.writing-mode-toggle button.is-active {
+.toolbar-toggle button.is-active {
   border-color: rgba(255, 255, 255, 0.82);
   background: rgba(255, 255, 255, 0.16);
 }

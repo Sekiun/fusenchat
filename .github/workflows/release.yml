@@ -54,11 +54,11 @@ jobs:
             target: ""
             args: --bundles nsis
           - os: macos-latest
-            target: aarch64-apple-darwin
-            args: --target aarch64-apple-darwin --bundles dmg
-          - os: macos-latest
-            target: x86_64-apple-darwin
-            args: --target x86_64-apple-darwin --bundles dmg
+            target: ""
+            args: --bundles dmg
+          - os: macos-15-intel
+            target: ""
+            args: --bundles dmg
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -132,7 +132,7 @@ jobs:
           python3 -c "import base64, os, pathlib; pathlib.Path(os.environ['KEY_PATH']).write_bytes(base64.b64decode(os.environ['APPLE_API_PRIVATE_KEY']))"
           echo "APPLE_API_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
 
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY }}
