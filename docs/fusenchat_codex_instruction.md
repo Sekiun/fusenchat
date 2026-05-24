@@ -1033,5 +1033,3 @@ Codexは実装時に以下を重視してください。
 - React KeyboardEvent / IME composition handling
 - HTML Canvas API
 - PNG `tEXt` / `iTXt` metadata chunk handling
-
-test
