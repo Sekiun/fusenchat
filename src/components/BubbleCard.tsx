@@ -1,4 +1,5 @@
 import { startBubbleFileDrag } from "../lib/fileUtils";
+import { isTauriRuntime } from "../lib/runtime";
 import type { BubbleItem } from "../types";
 
 type BubbleCardProps = {
@@ -18,7 +19,13 @@ export function BubbleCard({
   onDelete,
   onDragOutError,
 }: BubbleCardProps): JSX.Element {
+  const desktopMode = isTauriRuntime();
+
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>): void => {
+    if (!desktopMode) {
+      return;
+    }
+
     event.preventDefault();
     void startBubbleFileDrag(bubble.filePath).catch((error: unknown) => {
       console.error(error);
@@ -32,7 +39,11 @@ export function BubbleCard({
 
   return (
     <article className="bubble-row">
-      <div className="bubble-card" draggable onDragStart={handleDragStart}>
+      <div
+        className="bubble-card"
+        draggable={desktopMode}
+        onDragStart={desktopMode ? handleDragStart : undefined}
+      >
         <img
           className="bubble-card__image"
           src={bubble.previewSrc}
@@ -42,14 +53,16 @@ export function BubbleCard({
           draggable={false}
         />
         <div className="bubble-card__actions">
-          <button type="button" onClick={() => void onCopyPath(bubble)}>
-            Path
-          </button>
+          {desktopMode ? (
+            <button type="button" onClick={() => void onCopyPath(bubble)}>
+              Path
+            </button>
+          ) : null}
           <button type="button" onClick={() => void onCopyImage(bubble)}>
             Image
           </button>
           <button type="button" onClick={() => void onOpenFolder(bubble)}>
-            Folder
+            {desktopMode ? "Folder" : "Download"}
           </button>
           <button
             type="button"
