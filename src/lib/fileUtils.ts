@@ -2,6 +2,11 @@ import type { FusenchatPngMetadata } from "../types";
 import { isBlobUrl, isTauriRuntime } from "./runtime";
 import { writePngMetadata } from "./pngMetadataWeb";
 
+export type SavedBubblePng = {
+  blob?: Blob;
+  filePath: string;
+};
+
 export async function blobToUint8Array(blob: Blob): Promise<Uint8Array> {
   const arrayBuffer = await blob.arrayBuffer();
   return new Uint8Array(arrayBuffer);
@@ -11,26 +16,31 @@ export async function saveBubblePngWithMetadata(
   blob: Blob,
   fileName: string,
   metadata: FusenchatPngMetadata,
-): Promise<string> {
+): Promise<SavedBubblePng> {
   const bytes = await blobToUint8Array(blob);
 
   if (isTauriRuntime()) {
     const { invoke } = await import("@tauri-apps/api/core");
 
-    return invoke<string>("save_bubble_png_with_metadata", {
+    const filePath = await invoke<string>("save_bubble_png_with_metadata", {
       payload: {
         bytes: Array.from(bytes),
         fileName,
         metadata,
       },
     });
+
+    return { filePath };
   }
 
   const encodedBytes = writePngMetadata(bytes, metadata);
   const encodedBuffer = new ArrayBuffer(encodedBytes.byteLength);
   new Uint8Array(encodedBuffer).set(encodedBytes);
   const encodedBlob = new Blob([encodedBuffer], { type: "image/png" });
-  return URL.createObjectURL(encodedBlob);
+  return {
+    blob: encodedBlob,
+    filePath: URL.createObjectURL(encodedBlob),
+  };
 }
 
 export async function deleteBubbleFile(filePath: string): Promise<void> {

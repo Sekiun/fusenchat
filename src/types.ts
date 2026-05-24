@@ -3,6 +3,7 @@ export type RenderScale = 1 | 2 | 3;
 
 export type BubbleItem = {
   id: string;
+  blob: Blob;
   text: string;
   fileName: string;
   filePath: string;
