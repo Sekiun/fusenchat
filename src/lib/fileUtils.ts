@@ -30,9 +30,7 @@ export async function saveBubblePngWithMetadata(
   const encodedBuffer = new ArrayBuffer(encodedBytes.byteLength);
   new Uint8Array(encodedBuffer).set(encodedBytes);
   const encodedBlob = new Blob([encodedBuffer], { type: "image/png" });
-  const objectUrl = URL.createObjectURL(encodedBlob);
-  triggerDownload(objectUrl, fileName);
-  return objectUrl;
+  return URL.createObjectURL(encodedBlob);
 }
 
 export async function deleteBubbleFile(filePath: string): Promise<void> {

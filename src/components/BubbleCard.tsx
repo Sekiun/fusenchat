@@ -23,6 +23,13 @@ export function BubbleCard({
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>): void => {
     if (!desktopMode) {
+      event.dataTransfer.effectAllowed = "copy";
+      event.dataTransfer.setData(
+        "DownloadURL",
+        `image/png:${bubble.fileName}:${bubble.previewSrc}`,
+      );
+      event.dataTransfer.setData("text/uri-list", bubble.previewSrc);
+      event.dataTransfer.setData("text/plain", bubble.previewSrc);
       return;
     }
 
@@ -41,8 +48,8 @@ export function BubbleCard({
     <article className="bubble-row">
       <div
         className="bubble-card"
-        draggable={desktopMode}
-        onDragStart={desktopMode ? handleDragStart : undefined}
+        draggable
+        onDragStart={handleDragStart}
       >
         <img
           className="bubble-card__image"
