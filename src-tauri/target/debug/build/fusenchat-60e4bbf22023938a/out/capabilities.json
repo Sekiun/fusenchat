@@ -1,1 +1,0 @@
-{"default":{"identifier":"default","description":"Default desktop capability for fusenchat.","local":true,"windows":["main"],"permissions":["core:default","opener:allow-reveal-item-in-dir","clipboard-manager:allow-write-text","clipboard-manager:allow-write-image"]}}
