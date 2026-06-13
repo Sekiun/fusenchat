@@ -190,8 +190,12 @@ fn normalize_font_family_name(value: &str) -> Option<String> {
 
 #[cfg(target_os = "windows")]
 fn list_system_font_families_impl() -> Result<Vec<String>, String> {
+    let installed_fonts = query_windows_installed_font_collection()?;
+    if !installed_fonts.is_empty() {
+        return Ok(dedupe_and_sort_font_families(installed_fonts));
+    }
+
     let mut fonts = Vec::new();
-    fonts.extend(query_windows_installed_font_collection()?);
     fonts.extend(query_windows_font_registry(
         r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts",
     )?);

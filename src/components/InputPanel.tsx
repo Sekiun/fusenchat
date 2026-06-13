@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { toCssFontFamily } from "../lib/fontUtils";
+import { toCssFontFamily, type FontOption } from "../lib/fontUtils";
 import type { RenderScale, WritingMode } from "../types";
 import { readMetadataFromPngBytes } from "../lib/pngMetadata";
 
@@ -13,11 +13,11 @@ const BUBBLE_COLOR_PRESETS = [
 ];
 
 type InputPanelProps = {
-  availableFonts: string[];
+  availableFonts: FontOption[];
   bubbleColor: string;
-  fontFamily: string;
+  fontOptionId: string;
   onBubbleColorChange: (value: string) => void;
-  onFontFamilyChange: (value: string) => void;
+  onFontOptionChange: (value: string) => void;
   onScaleChange: (value: RenderScale) => void;
   onWritingModeChange: (value: WritingMode) => void;
   onChange: (value: string) => void;
@@ -34,9 +34,9 @@ type InputPanelProps = {
 export function InputPanel({
   availableFonts,
   bubbleColor,
-  fontFamily,
+  fontOptionId,
   onBubbleColorChange,
-  onFontFamilyChange,
+  onFontOptionChange,
   onScaleChange,
   onWritingModeChange,
   onChange,
@@ -51,6 +51,8 @@ export function InputPanel({
 }: InputPanelProps): JSX.Element {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
+  const selectedFont =
+    availableFonts.find((font) => font.id === fontOptionId) ?? availableFonts[0] ?? null;
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     if (event.key !== "Enter" || event.shiftKey) {
@@ -146,13 +148,27 @@ export function InputPanel({
             <span>System Font</span>
             <select
               className="toolbar-select toolbar-select--font"
-              value={fontFamily}
-              style={{ fontFamily: toCssFontFamily(fontFamily) }}
-              onChange={(event) => onFontFamilyChange(event.target.value)}
+              value={fontOptionId}
+              style={
+                selectedFont
+                  ? {
+                      fontFamily: toCssFontFamily(selectedFont.family),
+                      fontWeight: selectedFont.weight,
+                    }
+                  : undefined
+              }
+              onChange={(event) => onFontOptionChange(event.target.value)}
             >
-              {availableFonts.map((family) => (
-                <option key={family} value={family} style={{ fontFamily: toCssFontFamily(family) }}>
-                  {family}
+              {availableFonts.map((font) => (
+                <option
+                  key={font.id}
+                  value={font.id}
+                  style={{
+                    fontFamily: toCssFontFamily(font.family),
+                    fontWeight: font.weight,
+                  }}
+                >
+                  {font.label}
                 </option>
               ))}
             </select>

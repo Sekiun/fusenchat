@@ -6,9 +6,12 @@ import { renderBubbleToPng } from "./lib/bubbleRenderer";
 import { buildBubbleFileName, formatIsoWithOffset } from "./lib/dateUtils";
 import {
   DEFAULT_FONT_FAMILY,
-  getFallbackFontFamilies,
-  loadLocalFontFamilies,
-  mergeFontFamilies,
+  DEFAULT_FONT_OPTION_ID,
+  getFallbackFontOptions,
+  loadLocalFontOptions,
+  mergeFontOptions,
+  toSystemFontOptions,
+  type FontOption,
 } from "./lib/fontUtils";
 import {
   copyBubbleImage,
@@ -24,11 +27,18 @@ import type { BubbleItem, FusenchatPngMetadata, RenderScale, WritingMode } from 
 const DEFAULT_BUBBLE_COLOR = "#2f2f2f";
 
 export default function App(): JSX.Element {
-  const [availableFonts, setAvailableFonts] = useState<string[]>([DEFAULT_FONT_FAMILY]);
+  const [availableFonts, setAvailableFonts] = useState<FontOption[]>([
+    {
+      family: DEFAULT_FONT_FAMILY,
+      id: DEFAULT_FONT_OPTION_ID,
+      label: DEFAULT_FONT_FAMILY,
+      weight: 400,
+    },
+  ]);
   const [bubbles, setBubbles] = useState<BubbleItem[]>([]);
   const [inputText, setInputText] = useState("");
   const [bubbleColor, setBubbleColor] = useState(DEFAULT_BUBBLE_COLOR);
-  const [fontFamily, setFontFamily] = useState(DEFAULT_FONT_FAMILY);
+  const [fontOptionId, setFontOptionId] = useState(DEFAULT_FONT_OPTION_ID);
   const [writingMode, setWritingMode] = useState<WritingMode>("horizontal");
   const [scale, setScale] = useState<RenderScale>(1);
   const [notice, setNotice] = useState<string | null>(null);
@@ -47,11 +57,19 @@ export default function App(): JSX.Element {
   useEffect(() => {
     let active = true;
 
-    void Promise.all([loadLocalFontFamilies(), listSystemFontFamilies().catch(() => [])]).then(
+    void Promise.all([loadLocalFontOptions(), listSystemFontFamilies().catch(() => [])]).then(
       ([localFonts, systemFonts]) => {
         if (active) {
-          setAvailableFonts(
-            mergeFontFamilies(localFonts, systemFonts, getFallbackFontFamilies()),
+          const mergedFonts = mergeFontOptions(
+            toSystemFontOptions(systemFonts),
+            localFonts,
+            getFallbackFontOptions(),
+          );
+          setAvailableFonts(mergedFonts);
+          setFontOptionId((current) =>
+            mergedFonts.some((font) => font.id === current)
+              ? current
+              : (mergedFonts[0]?.id ?? DEFAULT_FONT_OPTION_ID),
           );
         }
       },
@@ -61,6 +79,14 @@ export default function App(): JSX.Element {
       active = false;
     };
   }, []);
+
+  const selectedFont =
+    availableFonts.find((font) => font.id === fontOptionId) ?? availableFonts[0] ?? {
+      family: DEFAULT_FONT_FAMILY,
+      id: DEFAULT_FONT_OPTION_ID,
+      label: DEFAULT_FONT_FAMILY,
+      weight: 400,
+    };
 
   const handleSubmit = async (): Promise<void> => {
     if (isSubmitting) {
@@ -86,7 +112,8 @@ export default function App(): JSX.Element {
     try {
       const rendered = await renderBubbleToPng(rawText, {
         bubbleColor,
-        fontFamily,
+        fontFamily: selectedFont.family,
+        fontWeight: selectedFont.weight,
         scale,
         writingMode,
       });
@@ -107,6 +134,7 @@ export default function App(): JSX.Element {
         createdAt,
         bubbleColor: rendered.bubbleColor,
         fontFamily: rendered.fontFamily,
+        fontWeight: rendered.fontWeight,
         textColor: rendered.textColor,
         writingMode: rendered.writingMode,
         width: rendered.width,
@@ -210,9 +238,9 @@ export default function App(): JSX.Element {
       <InputPanel
         availableFonts={availableFonts}
         bubbleColor={bubbleColor}
-        fontFamily={fontFamily}
         onBubbleColorChange={setBubbleColor}
-        onFontFamilyChange={setFontFamily}
+        fontOptionId={selectedFont.id}
+        onFontOptionChange={setFontOptionId}
         onScaleChange={setScale}
         onWritingModeChange={setWritingMode}
         onChange={setInputText}

@@ -11,6 +11,7 @@ export type BubbleItem = {
   createdAt: string;
   bubbleColor: string;
   fontFamily: string;
+  fontWeight: number;
   textColor: string;
   writingMode: WritingMode;
   width: number;

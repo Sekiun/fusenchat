@@ -3,6 +3,7 @@ interface LocalFontData {
   fullName: string;
   postscriptName: string;
   style: string;
+  blob: () => Promise<Blob>;
 }
 
 interface Window {

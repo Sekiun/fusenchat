@@ -5,6 +5,7 @@ import type { RenderScale, WritingMode } from "../types";
 export type RenderBubbleOptions = {
   bubbleColor?: string;
   fontFamily?: string;
+  fontWeight?: number;
   fontSize?: number;
   lineHeight?: number;
   maxWidth?: number;
@@ -20,6 +21,7 @@ export type RenderedBubble = {
   blob: Blob;
   bubbleColor: string;
   fontFamily: string;
+  fontWeight: number;
   textColor: string;
   width: number;
   height: number;
@@ -107,6 +109,7 @@ type MarkdownListItemToken = {
 const DEFAULT_OPTIONS: Required<RenderBubbleOptions> = {
   bubbleColor: "#2f2f2f",
   fontFamily: "Yu Gothic UI",
+  fontWeight: 400,
   fontSize: 24,
   lineHeight: 1.4,
   maxWidth: 780,
@@ -220,6 +223,7 @@ async function renderHorizontalBubble(
     blob: await canvasToBlob(canvas),
     bubbleColor,
     fontFamily: options.fontFamily,
+    fontWeight: baseStyle.fontWeight,
     textColor,
     width: bubbleWidth,
     height: bubbleHeight,
@@ -253,7 +257,7 @@ async function renderVerticalBubble(
   canvas.width = Math.max(1, Math.ceil(bubbleWidth * scale));
   canvas.height = Math.max(1, Math.ceil(bubbleHeight * scale));
   ctx.scale(scale, scale);
-
+ 
   const svgMarkup = createVerticalBubbleSvg({
     backgroundColor: bubbleColor,
     contentHeight,
@@ -266,6 +270,7 @@ async function renderVerticalBubble(
       getVerticalMarkupCss({
         fontFamily: baseStyle.fontFamily,
         fontSize: baseStyle.fontSize,
+        fontWeight: baseStyle.fontWeight,
         lineHeight: baseStyle.lineHeight,
         maxContentHeight: contentHeight,
         textColor,
@@ -287,6 +292,7 @@ async function renderVerticalBubble(
     blob: await canvasToBlob(canvas),
     bubbleColor,
     fontFamily: options.fontFamily,
+    fontWeight: baseStyle.fontWeight,
     textColor,
     width: bubbleWidth,
     height: bubbleHeight,
@@ -900,7 +906,7 @@ function createBaseStyle(options: Required<RenderBubbleOptions>): TextStyle {
     fontFamily: options.fontFamily,
     fontSize: options.fontSize,
     fontStyle: "normal",
-    fontWeight: 600,
+    fontWeight: options.fontWeight,
     lineHeight: options.lineHeight,
     strike: false,
     underline: false,
@@ -1225,6 +1231,7 @@ function getVerticalContentStyle(
 function getVerticalMarkupCss(input: {
   fontFamily: string;
   fontSize: number;
+  fontWeight: number;
   lineHeight: number;
   maxContentHeight: number;
   textColor: string;
@@ -1236,7 +1243,7 @@ function getVerticalMarkupCss(input: {
       fontFamily: input.fontFamily,
       fontSize: input.fontSize,
       fontStyle: "normal",
-      fontWeight: 600,
+      fontWeight: input.fontWeight,
       lineHeight: input.lineHeight,
       strike: false,
       underline: false,
